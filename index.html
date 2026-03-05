@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intermediate Code Generator - Virtual Lab</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+        }
+        header {
+            background: linear-gradient(90deg, #1a1a2e, #16213e);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #e94560;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        header h1 { font-size: 28px; color: #e94560; text-transform: uppercase; letter-spacing: 2px; }
+        header .subtitle { font-size: 14px; color: #a5a5a5; }
+        .student-info { text-align: right; font-size: 14px; color: #ccc; }
+        .student-info span { color: #e94560; font-weight: bold; }
+        nav {
+            background: #16213e; padding: 12px 40px; display: flex; gap: 20px; border-bottom: 1px solid #333;
+        }
+        nav a {
+            color: #e94560; text-decoration: none; font-size: 15px; padding: 8px 20px;
+            border-radius: 5px; transition: all 0.3s ease; border: 1px solid transparent;
+        }
+        nav a:hover, nav a.active { background: #e94560; color: #fff; border-color: #e94560; }
+        .hero { text-align: center; padding: 80px 40px 40px; }
+        .hero h2 {
+            font-size: 48px; margin-bottom: 15px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 18px; color: #b0b0b0; max-width: 750px; margin: 0 auto 40px; line-height: 1.8; }
+        .hero a.btn {
+            display: inline-block; padding: 15px 40px;
+            background: linear-gradient(90deg, #e94560, #c0392b); color: #fff; text-decoration: none;
+            border-radius: 50px; font-size: 18px; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 1px; transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+        .hero a.btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(233, 69, 96, 0.6); }
+        .content {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;
+            padding: 40px; max-width: 1200px; margin: 0 auto;
+        }
+        .card {
+            background: #1a1a2e; border: 1px solid #333; border-radius: 12px;
+            padding: 30px; width: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3); border-color: #e94560; }
+        .card h3 { color: #e94560; font-size: 20px; margin-bottom: 12px; }
+        .card p { color: #999; font-size: 14px; line-height: 1.7; }
+        .section-title { text-align: center; font-size: 32px; color: #e94560; margin-bottom: 10px; }
+        .section-desc { text-align: center; color: #888; margin-bottom: 40px; font-size: 16px; }
+        .theory {
+            max-width: 900px; margin: 0 auto; padding: 40px; background: #1a1a2e;
+            border-radius: 12px; border: 1px solid #333; margin-bottom: 40px;
+        }
+        .theory h3 { color: #e94560; margin-bottom: 15px; font-size: 22px; }
+        .theory p, .theory li { color: #bbb; line-height: 1.8; font-size: 15px; }
+        .theory ul { padding-left: 25px; margin-top: 10px; }
+        .theory table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .theory table th, .theory table td { border: 1px solid #444; padding: 10px 15px; text-align: left; color: #ccc; }
+        .theory table th { background: #e94560; color: #fff; }
+        .theory code {
+            background: #0f0f1a; color: #00ff88; padding: 2px 8px; border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace; font-size: 14px;
+        }
+        .theory pre {
+            background: #0f0f1a; color: #00ff88; padding: 15px 20px; border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace; font-size: 14px;
+            line-height: 1.6; overflow-x: auto; margin-top: 10px;
+        }
+        footer {
+            text-align: center; padding: 25px; background: #1a1a2e;
+            border-top: 2px solid #e94560; color: #777; font-size: 14px; margin-top: 40px;
+        }
+        footer span { color: #e94560; }
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 10px; }
+            .student-info { text-align: center; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Intermediate Code Generator</h1>
+            <div class="subtitle">Compiler Design - Virtual Lab</div>
+        </div>
+        <div class="student-info">
+            <div>Created by: <span>Santhosh R K</span></div>
+            <div>Register No: <span>RA2311003050411</span></div>
+        </div>
+    </header>
+
+    <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="#theory">Theory</a>
+        <a href="#tac">Three-Address Code</a>
+        <a href="#representations">IR Representations</a>
+        <a href="#quadruples">Quadruples &amp; Triples</a>
+        <a href="simulation.html">Simulation</a>
+    </nav>
+
+    <div class="hero">
+        <h2>Intermediate Code Generator</h2>
+        <p>
+            Explore the fourth phase of a compiler — the <strong>Intermediate Code Generator (ICG)</strong>.
+            Understand how high-level source code is translated into a machine-independent
+            <strong>Intermediate Representation (IR)</strong> such as Three-Address Code (TAC),
+            Quadruples, and Triples that bridges the gap between front-end analysis and back-end code generation.
+        </p>
+        <a href="simulation.html" class="btn">Start Simulation</a>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <h3>📝 Three-Address Code</h3>
+            <p>Translates complex expressions into a sequence of simple instructions, each having at most three operands — two sources and one destination using temporaries.</p>
+        </div>
+        <div class="card">
+            <h3>📊 Quadruples</h3>
+            <p>Represents each TAC instruction as a 4-field record: (operator, arg1, arg2, result). This tabular form makes optimization and code generation straightforward.</p>
+        </div>
+        <div class="card">
+            <h3>📋 Triples</h3>
+            <p>An alternative to quadruples that removes the explicit result field. Instead, each instruction is referenced by its index number, reducing storage requirements.</p>
+        </div>
+        <div class="card">
+            <h3>🔄 Temporary Variables</h3>
+            <p>The ICG creates temporary variables (t1, t2, t3...) to hold intermediate computation results when complex expressions are decomposed into simple operations.</p>
+        </div>
+        <div class="card">
+            <h3>🏷️ Label Generation</h3>
+            <p>For control flow statements (if-else, while, for), the ICG generates labels (L0, L1, L2...) and conditional/unconditional goto instructions.</p>
+        </div>
+        <div class="card">
+            <h3>🎯 Machine Independence</h3>
+            <p>Intermediate code is independent of the target machine architecture, enabling the same front-end to generate code for different back-end targets.</p>
+        </div>
+    </div>
+
+    <div id="theory" style="padding: 20px 40px;">
+        <h2 class="section-title">Theory</h2>
+        <p class="section-desc">Understanding the fundamentals of Intermediate Code Generation</p>
+        <div class="theory">
+            <h3>What is an Intermediate Code Generator?</h3>
+            <p>
+                The <strong>Intermediate Code Generator (ICG)</strong> is the fourth phase of a compiler.
+                After lexical analysis, parsing, and semantic analysis, the ICG translates the validated
+                Abstract Syntax Tree (AST) into an <strong>Intermediate Representation (IR)</strong>.
+                This IR is a low-level, machine-independent code that is easier to optimize and translate into actual machine code.
+            </p>
+            <br>
+            <h3>Key Functions</h3>
+            <ul>
+                <li><strong>Expression Decomposition</strong> — breaks complex expressions into simple three-address instructions</li>
+                <li><strong>Temporary Generation</strong> — creates temporary variables (t1, t2, ...) for intermediate results</li>
+                <li><strong>Label Generation</strong> — creates labels (L0, L1, ...) for control flow targets</li>
+                <li><strong>Control Flow Translation</strong> — converts if-else, while, for into goto-based instructions</li>
+                <li><strong>Assignment Translation</strong> — converts assignments into TAC form</li>
+                <li><strong>Quadruple/Triple Generation</strong> — produces tabular IR representations</li>
+            </ul>
+            <br>
+            <h3>How It Works</h3>
+            <p>The ICG traverses the AST in a specific order. For each node:</p>
+            <ul>
+                <li>If it's an <strong>arithmetic expression</strong> like <code>a + b * c</code>, it decomposes into: <code>t1 = b * c</code> then <code>t2 = a + t1</code></li>
+                <li>If it's an <strong>assignment</strong> like <code>x = a + b * c;</code>, it adds: <code>x = t2</code></li>
+                <li>If it's an <strong>if statement</strong>, it generates conditional jumps: <code>if a > b goto L0</code>, <code>goto L1</code></li>
+                <li>If it's a <strong>while loop</strong>, it generates labels and back-edges for looping</li>
+            </ul>
+            <br>
+            <h3>Example</h3>
+            <p>Source code:</p>
+            <pre>  x = a + b * c - d / e;</pre>
+            <p style="margin-top:10px;">Three-Address Code (TAC):</p>
+            <pre>  t1 = b * c
+  t2 = d / e
+  t3 = a + t1
+  t4 = t3 - t2
+  x  = t4</pre>
+        </div>
+    </div>
+
+    <div id="tac" style="padding: 20px 40px;">
+        <h2 class="section-title">Three-Address Code</h2>
+        <p class="section-desc">The most common intermediate representation form</p>
+        <div class="theory">
+            <h3>What is Three-Address Code?</h3>
+            <p>
+                <strong>Three-Address Code (TAC)</strong> is a sequence of instructions where each
+                instruction has at most <em>three addresses</em> — typically two operand addresses and one result address.
+            </p>
+            <pre>  result = operand1  op  operand2</pre>
+            <br>
+            <h3>Types of TAC Instructions</h3>
+            <table>
+                <tr><th>Type</th><th>Format</th><th>Example</th></tr>
+                <tr><td>Assignment (binary)</td><td><code>x = y op z</code></td><td><code>t1 = a + b</code></td></tr>
+                <tr><td>Assignment (unary)</td><td><code>x = op y</code></td><td><code>t1 = -a</code></td></tr>
+                <tr><td>Copy</td><td><code>x = y</code></td><td><code>x = t1</code></td></tr>
+                <tr><td>Unconditional Jump</td><td><code>goto L</code></td><td><code>goto L2</code></td></tr>
+                <tr><td>Conditional Jump</td><td><code>if x relop y goto L</code></td><td><code>if a &gt; b goto L0</code></td></tr>
+                <tr><td>Label</td><td><code>L:</code></td><td><code>L0:</code></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="representations" style="padding: 20px 40px;">
+        <h2 class="section-title">IR Representations</h2>
+        <p class="section-desc">Different ways to represent intermediate code</p>
+        <div class="theory">
+            <table>
+                <tr><th>Feature</th><th>Three-Address Code</th><th>Quadruples</th><th>Triples</th></tr>
+                <tr><td>Format</td><td><code>x = y op z</code></td><td><code>(op, y, z, x)</code></td><td><code>(op, y, z)</code> — result = index</td></tr>
+                <tr><td>Result Storage</td><td>Named variable / temp</td><td>Explicit result field</td><td>Implicit (position index)</td></tr>
+                <tr><td>Fields per Entry</td><td>Varies (text)</td><td>4 fields</td><td>3 fields</td></tr>
+                <tr><td>Reordering</td><td>Easy</td><td>Easy</td><td>Difficult (index-dependent)</td></tr>
+                <tr><td>Space</td><td>Moderate</td><td>More (extra field)</td><td>Less (no result field)</td></tr>
+                <tr><td>Use Case</td><td>Readable form</td><td>Optimization passes</td><td>Compact representation</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="quadruples" style="padding: 20px 40px;">
+        <h2 class="section-title">Quadruples &amp; Triples</h2>
+        <p class="section-desc">Tabular representations for the expression: a + b * c - d</p>
+        <div class="theory">
+            <h3>Quadruple Representation</h3>
+            <table>
+                <tr><th>#</th><th>Operator</th><th>Arg1</th><th>Arg2</th><th>Result</th></tr>
+                <tr><td>0</td><td><code>*</code></td><td>b</td><td>c</td><td>t1</td></tr>
+                <tr><td>1</td><td><code>+</code></td><td>a</td><td>t1</td><td>t2</td></tr>
+                <tr><td>2</td><td><code>-</code></td><td>t2</td><td>d</td><td>t3</td></tr>
+            </table>
+            <br>
+            <h3>Triple Representation</h3>
+            <table>
+                <tr><th>#</th><th>Operator</th><th>Arg1</th><th>Arg2</th></tr>
+                <tr><td>(0)</td><td><code>*</code></td><td>b</td><td>c</td></tr>
+                <tr><td>(1)</td><td><code>+</code></td><td>a</td><td>(0)</td></tr>
+                <tr><td>(2)</td><td><code>-</code></td><td>(1)</td><td>d</td></tr>
+            </table>
+            <p style="margin-top:15px; color:#999; font-size:14px;">
+                In triples, <code>(0)</code>, <code>(1)</code>, <code>(2)</code> refer to the result
+                of that instruction index — no temporary variable names are needed.
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Intermediate Code Generator Virtual Lab | Created by <span>Santhosh R K</span> | Reg No: <span>RA2311003050411</span></p>
+        <p>&copy; 2025 Compiler Design Lab</p>
+    </footer>
+
+</body>
+</html>
